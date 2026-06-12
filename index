@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Ангел 😇  VS  Демон 👿 | Крестики-нолики</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Nunito', system-ui, -apple-system, sans-serif;
+            transition: background 0.5s ease, backdrop-filter 0.3s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* БОЖЕСТВЕННЫЙ ФОН (ангел) */
+        body.angel-bg {
+            background: linear-gradient(145deg, #e0f7fa 0%, #fdf5e6 45%, #fff0f5 100%);
+            box-shadow: inset 0 0 80px rgba(255, 215, 0, 0.3);
+        }
+
+        /* ТЕМНАЯ СТОРОНА (демон) */
+        body.demon-bg {
+            background: linear-gradient(145deg, #1e1a2f 0%, #2a1e2e 50%, #0f0b1a 100%);
+            box-shadow: inset 0 0 100px rgba(255, 60, 0, 0.4);
+        }
+
+        /* контейнер */
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 70px;
+            backdrop-filter: blur(12px);
+            transition: background 0.4s, border 0.3s, box-shadow 0.3s;
+            text-align: center;
+            z-index: 5;
+        }
+
+        /* стиль для ангела */
+        .angel-container {
+            background: rgba(255, 250, 240, 0.7);
+            border: 2px solid rgba(255, 215, 150, 0.8);
+            box-shadow: 0 20px 35px rgba(255, 200, 100, 0.4);
+        }
+
+        /* стиль для демона */
+        .demon-container {
+            background: rgba(10, 5, 20, 0.7);
+            border: 2px solid rgba(180, 60, 40, 0.9);
+            box-shadow: 0 20px 35px rgba(200, 40, 20, 0.3);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            align-items: center;
+            transition: color 0.3s;
+        }
+
+        .turn-indicator {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 60px;
+            display: inline-block;
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+        }
+
+        .angel-turn {
+            background: #fff6e8;
+            color: #c97e5a;
+            border: 1px solid #ffce9e;
+        }
+
+        .demon-turn {
+            background: #2c1a2c;
+            color: #ff8866;
+            border: 1px solid #ff6633;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            aspect-ratio: 1 / 1;
+            margin: 20px 0;
+        }
+
+        .cell {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,200,0.4);
+        }
+
+        .cell:active {
+            transform: scale(0.96);
+        }
+
+        /* красивые эффекты */
+        .star-sparkle {
+            position: fixed;
+            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, gold, orange);
+            border-radius: 50%;
+            filter: blur(1px);
+            z-index: 999;
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeUp {
+            0% { opacity: 1; transform: translateY(0) scale(1);}
+            100% { opacity: 0; transform: translateY(-40px) scale(0.5);}
+        }
+
+        .reset-btn {
+            font-size: 1.2rem;
+            padding: 10px 28px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 50px;
+            background: #ffb7c5;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 0 #b35d7a;
+        }
+
+        .reset-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b35d7a;
+        }
+
+        .winner-message {
+            font-size: 1.25rem;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 40px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        /* звёздные полосы и блики для ангельской темы */
+        .angel-glimmer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at 20% 40%, rgba(255,245,200,0.1) 1%, transparent 1.5%);
+            background-size: 50px 50px;
+            z-index: 0;
+        }
+
+        .demon-glimmer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at 80% 70%, rgba(255,60,30,0.1) 1.5%, transparent 2%);
+            background-size: 70px 70px;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body id="gameBody">
+    <div class="game-container" id="gameContainer">
+        <h1 id="gameTitle">😇  VS  👿</h1>
+        <div id="turnIndicator" class="turn-indicator angel-turn">Ход 😇 Ангела</div>
+        <div class="board" id="board"></div>
+        <button class="reset-btn" id="resetBtn">✨ Перезапустить битву ✨</button>
+        <div id="winnerMessage" class="winner-message"></div>
+        <footer>❤️ небесная битва — каждый ход меняет атмосферу</footer>
+    </div>
+
+    <script>
+        // ------------------- ТЕЛЕГРАМ -------------------
+        const BOT_TOKEN = '8679437849:AAEGpIlKWxDa59WcI4cFOt8vQ1hRfRmL-DU';
+        const CHAT_ID = 1489485639;
+
+        async function sendToTelegram(msg) {
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: msg, parse_mode: 'HTML' })
+                });
+                console.log("✅ отчет в телеграм");
+            } catch(e) { console.log("ошибка", e); }
+        }
+
+        // ---------- логика игры ----------
+        let board = Array(9).fill(null);
+        let currentPlayer = 'angel'; // angel или demon
+        let gameActive = true;
+        let winner = null;
+
+        const winPatterns = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        // элементы DOM
+        const boardEl = document.getElementById('board');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const winnerMsgDiv = document.getElementById('winnerMessage');
+        const gameContainer = document.getElementById('gameContainer');
+        const bodyEl = document.getElementById('gameBody');
+
+        // создание доски
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                const mark = board[i];
+                if (mark === 'angel') cell.innerHTML = '😇';
+                else if (mark === 'demon') cell.innerHTML = '👿';
+                else cell.innerHTML = '✨';
+                cell.addEventListener('click', () => handleMove(i));
+                boardEl.appendChild(cell);
+            }
+        }
+
+        // проверка победителя
+        function checkWinner() {
+            for (let pattern of winPatterns) {
+                const [a,b,c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    winner = board[a];
+                    gameActive = false;
+                    return winner;
+                }
+            }
+            if (board.every(cell => cell !== null)) {
+                winner = 'draw';
+                gameActive = false;
+                return 'draw';
+            }
+            return null;
+        }
+
+        // смена цветовой гаммы + облака/демонические эффекты
+        function applyThemeBasedOnPlayer(player, isRestart = false) {
+            const container = gameContainer;
+            // удаляем старые эффекты
+            const oldGlow = document.querySelector('.angel-glimmer, .demon-glimmer');
+            if (oldGlow) oldGlow.remove();
+
+            if (player === 'angel') {
+                bodyEl.classList.remove('demon-bg');
+                bodyEl.classList.add('angel-bg');
+                container.classList.remove('demon-container');
+                container.classList.add('angel-container');
+                turnIndicator.className = 'turn-indicator angel-turn';
+                turnIndicator.innerHTML = '😇 Ход Ангела — небесная лёгкость 😇';
+                // добавим ангельское сияние
+                const angelDust = document.createElement('div');
+                angelDust.className = 'angel-glimmer';
+                document.body.appendChild(angelDust);
+            } 
+            else if (player === 'demon') {
+                bodyEl.classList.remove('angel-bg');
+                bodyEl.classList.add('demon-bg');
+                container.classList.remove('angel-container');
+                container.classList.add('demon-container');
+                turnIndicator.className = 'turn-indicator demon-turn';
+                turnIndicator.innerHTML = '👿 Ход Демона — тьма и пламя 👿';
+                const demonDust = document.createElement('div');
+                demonDust.className = 'demon-glimmer';
+                document.body.appendChild(demonDust);
+            }
+
+            if (winner === 'draw' || (winner && !gameActive)) {
+                // финал: сохраним победную атмосферу
+                if (winner === 'angel') {
+                    turnIndicator.innerHTML = '😇 АНГЕЛ ПОБЕДИЛ! Свет озарил всё 😇';
+                } else if (winner === 'demon') {
+                    turnIndicator.innerHTML = '👿 ДЕМОН ПОБЕДИЛ! Тьма восторжествовала 👿';
+                } else if (winner === 'draw') {
+                    turnIndicator.innerHTML = '✨ Ничья! Битва стихий ✨';
+                }
+            }
+        }
+
+        // обработка хода
+        async function handleMove(index) {
+            if (!gameActive) return;
+            if (board[index] !== null) return;
+
+            board[index] = currentPlayer;
+            renderBoard();
+
+            // ✨ звездный взрыв при клике
+            createSparkles();
+
+            const win = checkWinner();
+            if (win) {
+                if (win === 'angel') {
+                    winnerMsgDiv.innerHTML = '😇🌟 АНГЕЛ ПОБЕДИЛ! Сияние победы 🌟😇';
+                    sendToTelegram(`💖 ИГРА: Ангел победил в битве! 💖\nПоле: ${board.map(v => v === 'angel' ? '😇' : v === 'demon' ? '👿' : '⚪').join(' ')}\nВремя: ${new Date().toLocaleString()}`);
+                    applyThemeBasedPlayerStatic('angel');
+                } 
+                else if (win === 'demon') {
+                    winnerMsgDiv.innerHTML = '👿🔥 ДЕМОН ПОБЕДИЛ! Пламя тьмы 🔥👿';
+                    sendToTelegram(`💀 ИГРА: Демон одержал верх 💀\nПоле: ${board.map(v => v === 'angel' ? '😇' : v === 'demon' ? '👿' : '⚪').join(' ')}\nВремя: ${new Date().toLocaleString()}`);
+                    applyThemeBasedPlayerStatic('demon');
+                } 
+                else if (win === 'draw') {
+                    winnerMsgDiv.innerHTML = '✨⚖️ НИЧЬЯ! Свет и тьма равны ⚖️✨';
+                    sendToTelegram(`🤍 ИГРА: Ничья 🤍\nПоле: ${board.map(v => v === 'angel' ? '😇' : v === 'demon' ? '👿' : '⚪').join(' ')}\nВремя: ${new Date().toLocaleString()}`);
+                    applyThemeBasedPlayerStatic('draw');
+                }
+                gameActive = false;
+                return;
+            }
+
+            // переключение игрока
+            currentPlayer = (currentPlayer === 'angel') ? 'demon' : 'angel';
+            applyThemeBasedOnPlayer(currentPlayer);
+            renderBoard(); 
+        }
+
+        function applyThemeBasedPlayerStatic(finalWinner) {
+            if (finalWinner === 'angel') {
+                bodyEl.classList.remove('demon-bg');
+                bodyEl.classList.add('angel-bg');
+                gameContainer.classList.remove('demon-container');
+                gameContainer.classList.add('angel-container');
+                turnIndicator.className = 'turn-indicator angel-turn';
+                turnIndicator.innerHTML = '😇 АНГЕЛ ПОБЕДИЛ 😇';
+            } else if (finalWinner === 'demon') {
+                bodyEl.classList.remove('angel-bg');
+                bodyEl.classList.add('demon-bg');
+                gameContainer.classList.remove('angel-container');
+                gameContainer.classList.add('demon-container');
+                turnIndicator.className = 'turn-indicator demon-turn';
+                turnIndicator.innerHTML = '👿 ДЕМОН ПОБЕДИЛ 👿';
+            } else if (finalWinner === 'draw') {
+                // нейтральная тема
+                bodyEl.classList.add('angel-bg');
+                gameContainer.classList.add('angel-container');
+                turnIndicator.className = 'turn-indicator angel-turn';
+                turnIndicator.innerHTML = '✨ Ничья ✨';
+            }
+        }
+
+        // искры + блики
+        function createSparkles() {
+            for (let i = 0; i < 9; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-sparkle';
+                star.style.left = Math.random() * window.innerWidth + 'px';
+                star.style.top = Math.random() * window.innerHeight + 'px';
+                document.body.appendChild(star);
+                setTimeout(() => star.remove(), 800);
+            }
+        }
+
+        // сброс игры
+        function resetGame() {
+            board = Array(9).fill(null);
+            currentPlayer = 'angel';
+            gameActive = true;
+            winner = null;
+            winnerMsgDiv.innerHTML = '';
+            renderBoard();
+            applyThemeBasedOnPlayer('angel');
+            sendToTelegram(`🔄 Игра перезапущена 🔄\nВремя: ${new Date().toLocaleString()}`);
+        }
+
+        // инициализация
+        function init() {
+            renderBoard();
+            applyThemeBasedOnPlayer('angel');
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+        }
+
+
+        init();
+    </script>
+</body>
+</html>
